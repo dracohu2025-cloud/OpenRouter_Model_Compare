@@ -1,73 +1,119 @@
-# React + TypeScript + Vite
+# OpenRouter Model Comparison
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web application to compare pricing and context length of 345+ Large Language Models available on OpenRouter.
 
-Currently, two official plugins are available:
+![OpenRouter Model Comparison](https://img.shields.io/badge/Models-345+-blue) ![Vercel](https://img.shields.io/badge/Deployed-Vercel-black) ![React](https://img.shields.io/badge/React-18-61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+- **Real-time Data**: Fetches latest model information directly from OpenRouter API
+- **345+ Models**: Compare all available LLMs including GPT, Claude, Gemini, Llama, and more
+- **Smart Filtering**: Search by model name, ID, or provider
+- **Sortable Columns**: Sort by price, context length, provider, etc.
+- **Admin Panel**: Configure default model list with password protection
+- **Responsive Design**: Works on desktop and mobile devices
+- **Dark Theme**: Modern, eye-friendly dark UI
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Tech Stack
 
-## Expanding the ESLint configuration
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: CSS with custom design system
+- **Backend**: Vercel Serverless Functions
+- **Authentication**: HTTP Basic Auth for admin panel
+- **Deployment**: Vercel
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📁 Project Structure
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+├── api/
+│   ├── models.js      # Fetch all models from OpenRouter (with 1h cache)
+│   └── config.js      # Admin configuration API (requires auth)
+├── src/
+│   ├── App.tsx        # Main comparison page
+│   ├── pages/
+│   │   └── AdminPage.tsx   # Admin panel (/admin)
+│   ├── components/
+│   │   ├── ModelTable.tsx      # Sortable model table
+│   │   └── ModelSelector.tsx   # Add model dropdown
+│   └── types.ts       # TypeScript interfaces
+├── vercel.json        # Vercel deployment config
+└── package.json
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Deploy to Vercel
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 1. Fork or Clone
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git clone https://github.com/dracohu2025-cloud/OpenRouter_Model_Compare.git
+cd OpenRouter_Model_Compare
 ```
+
+### 2. Deploy to Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/dracohu2025-cloud/OpenRouter_Model_Compare)
+
+Or manually:
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Import the GitHub repository
+3. Deploy with default settings
+
+### 3. Configure Admin Password
+
+In your Vercel project settings:
+
+1. Go to **Settings** → **Environment Variables**
+2. Add the following:
+
+| Variable | Value | Required |
+|----------|-------|----------|
+| `ADMIN_PASSWORD` | Your secure password | ✅ Yes |
+| `ADMIN_USERNAME` | Custom username | ❌ No (default: `admin`) |
+
+3. Redeploy to apply changes
+
+## 🔧 Local Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## 📊 API Endpoints
+
+| Endpoint | Method | Auth | Description |
+|----------|--------|------|-------------|
+| `/api/models` | GET | No | Get all models with pricing |
+| `/api/config` | GET | No | Get default model configuration |
+| `/api/config` | POST | Yes | Update default model list |
+
+## 📝 Usage
+
+### Home Page (/)
+
+- View default model comparison list
+- Click **➕ Add Model** to add more models
+- Click **🔄 Reset** to restore default list
+- Sort by clicking column headers
+- Hover over modality icons for detailed info
+
+### Admin Panel (/admin)
+
+- Login with admin credentials
+- Search and select default models
+- Save to update for all users
+
+## 📄 License
+
+MIT License - feel free to use and modify for your own projects.
+
+## 🙏 Credits
+
+- Data source: [OpenRouter API](https://openrouter.ai/api/v1/models)
+- Built with [Vite](https://vitejs.dev/) + [React](https://react.dev/)
