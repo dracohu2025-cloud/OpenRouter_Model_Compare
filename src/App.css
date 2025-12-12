@@ -392,21 +392,6 @@ body {
   color: var(--color-accent-primary);
 }
 
-.coffee-btn {
-  display: inline-block;
-  transition: transform var(--transition-fast), opacity var(--transition-fast);
-}
-
-.coffee-btn:hover {
-  transform: scale(1.05);
-  opacity: 0.9;
-}
-
-.coffee-btn img {
-  height: 50px;
-  width: auto;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .header h1 {
