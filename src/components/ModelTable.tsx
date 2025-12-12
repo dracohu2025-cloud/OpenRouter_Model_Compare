@@ -112,7 +112,7 @@ function ModelTable({
                                 </span>
                             </td>
                             <td className="td-modality">
-                                <span className="modality-badge" title={`Input: ${model.inputModalities?.join(', ') || 'text'}\nOutput: ${model.outputModalities?.join(', ') || 'text'}\nFull: ${model.modality}`}>
+                                <span className="modality-badge" title={`Input: ${model.inputModalities?.join(', ') || 'text'}\nOutput: ${model.outputModalities?.join(', ') || 'text'}`}>
                                     {model.modality.includes('image') ? '🖼️' : ''}
                                     {model.modality.includes('audio') ? '🎵' : ''}
                                     {model.modality.includes('video') ? '🎬' : ''}
