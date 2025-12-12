@@ -8,7 +8,10 @@
  * Environment variables:
  *   ADMIN_USERNAME (default: admin)
  *   ADMIN_PASSWORD (required)
- *   DEFAULT_MODELS (comma-separated model IDs, persisted config)
+ *   DEFAULT_MODELS (comma-separated model IDs, initial config)
+ * 
+ * Storage: Uses in-memory cache for runtime updates,
+ *          falls back to environment variable on cold start.
  */
 
 // Fallback model list (when no config is set)
@@ -25,15 +28,49 @@ const FALLBACK_MODELS = [
     'mistralai/mistral-large-2411',
 ];
 
+// Runtime cache - persists across requests within the same serverless instance
+// Will reset on cold start, then reads from environment variable
+let runtimeCache = null;
+
 /**
- * Get default models from environment variable or fallback
+ * Initialize or get cached config
  */
-function getDefaultModels() {
-    const envModels = process.env.DEFAULT_MODELS;
-    if (envModels && envModels.trim()) {
-        return envModels.split(',').map(id => id.trim()).filter(Boolean);
+function getConfig() {
+    // If we have a runtime cache, use it
+    if (runtimeCache !== null) {
+        return runtimeCache;
     }
-    return FALLBACK_MODELS;
+
+    // Otherwise, initialize from environment variable or fallback
+    const envModels = process.env.DEFAULT_MODELS;
+    let models;
+
+    if (envModels && envModels.trim()) {
+        models = envModels.split(',').map(id => id.trim()).filter(Boolean);
+    } else {
+        models = FALLBACK_MODELS;
+    }
+
+    runtimeCache = {
+        defaultModels: models,
+        updatedAt: new Date().toISOString(),
+        source: envModels ? 'environment' : 'fallback'
+    };
+
+    return runtimeCache;
+}
+
+/**
+ * Update runtime cache
+ */
+function updateConfig(models, username) {
+    runtimeCache = {
+        defaultModels: models,
+        updatedAt: new Date().toISOString(),
+        updatedBy: username,
+        source: 'admin'
+    };
+    return runtimeCache;
 }
 
 /**
@@ -88,16 +125,16 @@ export default async function handler(req, res) {
 
     // GET: Get current config (public)
     if (req.method === 'GET') {
-        const defaultModels = getDefaultModels();
+        const config = getConfig();
         return res.status(200).json({
-            defaultModels,
-            count: defaultModels.length,
-            source: process.env.DEFAULT_MODELS ? 'environment' : 'fallback'
+            defaultModels: config.defaultModels,
+            count: config.defaultModels.length,
+            source: config.source,
+            updatedAt: config.updatedAt
         });
     }
 
     // POST: Update config (requires auth)
-    // Note: This updates the response but requires manual env var update for persistence
     if (req.method === 'POST') {
         const auth = verifyAuth(req);
 
@@ -118,16 +155,20 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Generate the environment variable value for the user to copy
+            // Update runtime cache - takes effect immediately
+            const config = updateConfig(defaultModels, auth.username);
+
+            // Generate environment variable value for persistence
             const envValue = defaultModels.join(',');
 
             return res.status(200).json({
                 success: true,
-                message: 'Config saved. To persist after redeployment, update the DEFAULT_MODELS environment variable in Vercel.',
-                defaultModels,
-                count: defaultModels.length,
+                message: 'Config updated successfully! Changes are now active.',
+                defaultModels: config.defaultModels,
+                count: config.defaultModels.length,
+                updatedAt: config.updatedAt,
                 envValue,
-                instructions: `Go to Vercel → Settings → Environment Variables → Set DEFAULT_MODELS to:\n${envValue}`
+                persistenceNote: 'To persist after redeployment, set DEFAULT_MODELS environment variable in Vercel to the envValue above.'
             });
 
         } catch (error) {
