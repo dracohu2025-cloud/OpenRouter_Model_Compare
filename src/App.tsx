@@ -222,6 +222,13 @@ function App() {
         )}
       </main>
 
+      {/* Ad Placeholder - Hidden by default, enable in CSS when ready */}
+      <div className="ad-container" aria-hidden="true">
+        <div className="ad-slot" id="ad-slot-bottom">
+          {/* Google AdSense code will go here */}
+        </div>
+      </div>
+
       <footer className="footer">
         <p>
           Data: <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer">OpenRouter API</a>
