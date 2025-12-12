@@ -6,9 +6,18 @@ interface ModelTableProps {
     sortField: SortField;
     sortDirection: SortDirection;
     onSort: (field: SortField) => void;
+    onRemove?: (modelId: string) => void;
+    showRemoveButton?: boolean;
 }
 
-function ModelTable({ models, sortField, sortDirection, onSort }: ModelTableProps) {
+function ModelTable({
+    models,
+    sortField,
+    sortDirection,
+    onSort,
+    onRemove,
+    showRemoveButton = false
+}: ModelTableProps) {
     const renderSortIcon = (field: SortField) => {
         if (sortField !== field) {
             return <span className="sort-icon">↕</span>;
@@ -38,11 +47,7 @@ function ModelTable({ models, sortField, sortDirection, onSort }: ModelTableProp
     };
 
     if (models.length === 0) {
-        return (
-            <div className="empty-state">
-                <p>没有找到符合条件的模型</p>
-            </div>
-        );
+        return null; // 让父组件处理空状态
     }
 
     return (
@@ -119,14 +124,25 @@ function ModelTable({ models, sortField, sortDirection, onSort }: ModelTableProp
                                 </span>
                             </td>
                             <td className="td-actions">
-                                <a
-                                    href={model.openRouterUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="action-link"
-                                >
-                                    查看 ↗
-                                </a>
+                                <div className="action-buttons">
+                                    <a
+                                        href={model.openRouterUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="action-link"
+                                    >
+                                        查看 ↗
+                                    </a>
+                                    {showRemoveButton && onRemove && (
+                                        <button
+                                            className="remove-btn"
+                                            onClick={() => onRemove(model.id)}
+                                            title="从对比列表移除"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
                             </td>
                         </tr>
                     ))}

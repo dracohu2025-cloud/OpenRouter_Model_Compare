@@ -31,3 +31,9 @@ export type SortField =
     | 'outputPrice';
 
 export type SortDirection = 'asc' | 'desc';
+
+// 配置：默认展示的模型 ID 列表
+export interface SiteConfig {
+    defaultModels: string[];
+    updatedAt: string;
+}
