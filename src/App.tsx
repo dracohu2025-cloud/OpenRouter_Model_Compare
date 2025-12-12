@@ -136,7 +136,7 @@ function App() {
     return (
       <div className="app loading-container">
         <div className="loading-spinner"></div>
-        <p>正在加载模型数据...</p>
+        <p>Loading model data...</p>
       </div>
     );
   }
@@ -144,7 +144,7 @@ function App() {
   if (error) {
     return (
       <div className="app error-container">
-        <h2>加载失败</h2>
+        <h2>Failed to load</h2>
         <p>{error}</p>
       </div>
     );
@@ -154,15 +154,15 @@ function App() {
     <div className="app">
       <header className="header">
         <div className="header-content">
-          <h1>OpenRouter 大模型价格对比</h1>
+          <h1>OpenRouter Model Comparison</h1>
           <p className="subtitle">
-            对比主流大模型的价格与上下文长度
+            Compare pricing and context length of top LLMs
           </p>
           {allModelsData && (
             <p className="update-time">
-              数据更新时间: {new Date(allModelsData.updatedAt).toLocaleString('zh-CN')}
+              Updated: {new Date(allModelsData.updatedAt).toLocaleString('en-US')}
               {' · '}
-              可用模型: {allModelsData.totalCount}
+              Available: {allModelsData.totalCount} models
             </p>
           )}
         </div>
@@ -179,14 +179,14 @@ function App() {
 
           <div className="toolbar-right">
             <span className="model-count">
-              当前对比 {displayedModels.length} 个模型
+              Comparing {displayedModels.length} models
             </span>
             <button
               className="reset-btn"
               onClick={resetToDefault}
-              title="重置为管理员配置的默认列表"
+              title="Reset to default list"
             >
-              🔄 重置列表
+              🔄 Reset
             </button>
           </div>
         </div>
@@ -203,17 +203,17 @@ function App() {
 
         {displayedModels.length === 0 && (
           <div className="empty-state">
-            <p>😅 没有选择任何模型</p>
-            <p>点击上方"添加模型对比"按钮添加模型</p>
+            <p>😅 No models selected</p>
+            <p>Click "Add Model" above to add models</p>
           </div>
         )}
       </main>
 
       <footer className="footer">
         <p>
-          数据来源: <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer">OpenRouter API</a>
+          Data: <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer">OpenRouter API</a>
           {' | '}
-          价格单位: 美元/百万 Token
+          Prices: USD per million tokens
         </p>
       </footer>
     </div>

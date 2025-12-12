@@ -63,10 +63,10 @@ function AdminPage() {
                 sessionStorage.setItem('adminAuth', credentials);
             } else {
                 const data = await res.json();
-                setAuthError(data.message || '登录失败');
+                setAuthError(data.message || 'Login failed');
             }
         } catch (err) {
-            setAuthError('网络错误');
+            setAuthError('Network error');
         }
     };
 
@@ -100,17 +100,17 @@ function AdminPage() {
             });
 
             if (res.ok) {
-                setSaveMessage('✅ 配置已保存！所有用户现在将看到新的默认模型列表。');
+                setSaveMessage('✅ Saved! All users will now see the new default model list.');
             } else {
                 if (res.status === 401) {
                     setIsAuthenticated(false);
                     sessionStorage.removeItem('adminAuth');
                 }
                 const data = await res.json();
-                setSaveMessage(`❌ 保存失败: ${data.message}`);
+                setSaveMessage(`❌ Save failed: ${data.message}`);
             }
         } catch (err) {
-            setSaveMessage('❌ 网络错误');
+            setSaveMessage('❌ Network error');
         }
 
         setSaving(false);
@@ -187,12 +187,12 @@ function AdminPage() {
         return (
             <div className="admin-login-page">
                 <div className="login-card">
-                    <h1>🔐 管理员登录</h1>
-                    <p>请输入管理员账号密码来管理默认模型列表</p>
+                    <h1>🔐 Admin Login</h1>
+                    <p>Enter admin credentials to manage default models</p>
 
                     <form onSubmit={handleLogin}>
                         <div className="form-group">
-                            <label>用户名</label>
+                            <label>Username</label>
                             <input
                                 type="text"
                                 value={username}
@@ -203,12 +203,12 @@ function AdminPage() {
                         </div>
 
                         <div className="form-group">
-                            <label>密码</label>
+                            <label>Password</label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="输入管理员密码"
+                                placeholder="Enter admin password"
                                 required
                             />
                         </div>
@@ -216,11 +216,11 @@ function AdminPage() {
                         {authError && <div className="error-message">{authError}</div>}
 
                         <button type="submit" className="login-btn">
-                            登录
+                            Login
                         </button>
                     </form>
 
-                    <a href="/" className="back-link">← 返回首页</a>
+                    <a href="/" className="back-link">← Back to Home</a>
                 </div>
             </div>
         );
@@ -231,24 +231,24 @@ function AdminPage() {
         <div className="admin-page">
             <header className="admin-header">
                 <div className="admin-header-left">
-                    <h1>⚙️ 管理后台</h1>
-                    <p>配置所有用户默认看到的模型列表</p>
+                    <h1>⚙️ Admin Panel</h1>
+                    <p>Configure default model list for all users</p>
                 </div>
                 <div className="admin-header-right">
-                    <a href="/" className="nav-link">← 返回首页</a>
-                    <button onClick={handleLogout} className="logout-btn">退出登录</button>
+                    <a href="/" className="nav-link">← Back to Home</a>
+                    <button onClick={handleLogout} className="logout-btn">Logout</button>
                 </div>
             </header>
 
             <main className="admin-main">
                 {loading ? (
-                    <div className="loading">加载中...</div>
+                    <div className="loading">Loading...</div>
                 ) : (
                     <>
                         <div className="admin-toolbar">
                             <input
                                 type="text"
-                                placeholder="搜索模型名称或 ID..."
+                                placeholder="Search models..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="search-input"
@@ -259,22 +259,22 @@ function AdminPage() {
                                 onChange={(e) => setProviderFilter(e.target.value)}
                                 className="provider-select"
                             >
-                                <option value="all">全部厂商 ({providers.length})</option>
+                                <option value="all">All Providers ({providers.length})</option>
                                 {providers.map(p => (
                                     <option key={p} value={p}>{p}</option>
                                 ))}
                             </select>
 
                             <button onClick={toggleAll} className="action-btn">
-                                {filteredModels.every(m => selectedIds.has(m.id)) ? '取消全选' : '全选'}
+                                {filteredModels.every(m => selectedIds.has(m.id)) ? 'Deselect All' : 'Select All'}
                             </button>
 
                             <button onClick={clearAll} className="action-btn danger">
-                                清空选择
+                                Clear
                             </button>
 
                             <div className="selected-info">
-                                已选 <strong>{selectedIds.size}</strong> 个模型
+                                <strong>{selectedIds.size}</strong> models selected
                             </div>
                         </div>
 
@@ -311,7 +311,7 @@ function AdminPage() {
                                 className="save-btn"
                                 disabled={saving}
                             >
-                                {saving ? '保存中...' : '💾 保存配置'}
+                                {saving ? 'Saving...' : '💾 Save Config'}
                             </button>
                         </div>
                     </>

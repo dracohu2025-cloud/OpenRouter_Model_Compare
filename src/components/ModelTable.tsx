@@ -26,7 +26,7 @@ function ModelTable({
     };
 
     const formatPrice = (price: number): string => {
-        if (price <= 0) return '免费';
+        if (price <= 0) return 'Free';
         if (price < 0.01) return `$${price.toFixed(4)}`;
         if (price < 1) return `$${price.toFixed(3)}`;
         return `$${price.toFixed(2)}`;
@@ -56,25 +56,25 @@ function ModelTable({
                 <thead>
                     <tr>
                         <th className="th-name" onClick={() => onSort('name')}>
-                            模型名称 {renderSortIcon('name')}
+                            Model {renderSortIcon('name')}
                         </th>
                         <th className="th-provider" onClick={() => onSort('provider')}>
-                            厂商 {renderSortIcon('provider')}
+                            Provider {renderSortIcon('provider')}
                         </th>
                         <th className="th-context" onClick={() => onSort('contextLength')}>
-                            上下文长度 {renderSortIcon('contextLength')}
+                            Context {renderSortIcon('contextLength')}
                         </th>
                         <th className="th-output" onClick={() => onSort('maxOutput')}>
-                            最大输出 {renderSortIcon('maxOutput')}
+                            Max Output {renderSortIcon('maxOutput')}
                         </th>
                         <th className="th-input-price" onClick={() => onSort('inputPrice')}>
-                            输入价格 {renderSortIcon('inputPrice')}
+                            Input Price {renderSortIcon('inputPrice')}
                         </th>
                         <th className="th-output-price" onClick={() => onSort('outputPrice')}>
-                            输出价格 {renderSortIcon('outputPrice')}
+                            Output Price {renderSortIcon('outputPrice')}
                         </th>
-                        <th className="th-modality">模态</th>
-                        <th className="th-actions">操作</th>
+                        <th className="th-modality">Modality</th>
+                        <th className="th-actions">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -112,7 +112,7 @@ function ModelTable({
                                 </span>
                             </td>
                             <td className="td-modality">
-                                <span className="modality-badge" title={model.modality}>
+                                <span className="modality-badge" title={`Input: ${model.inputModalities?.join(', ') || 'text'}\nOutput: ${model.outputModalities?.join(', ') || 'text'}\nFull: ${model.modality}`}>
                                     {model.modality.includes('image') ? '🖼️' : ''}
                                     {model.modality.includes('audio') ? '🎵' : ''}
                                     {model.modality.includes('video') ? '🎬' : ''}
@@ -131,13 +131,13 @@ function ModelTable({
                                         rel="noopener noreferrer"
                                         className="action-link"
                                     >
-                                        查看 ↗
+                                        View ↗
                                     </a>
                                     {showRemoveButton && onRemove && (
                                         <button
                                             className="remove-btn"
                                             onClick={() => onRemove(model.id)}
-                                            title="从对比列表移除"
+                                            title="Remove from comparison"
                                         >
                                             ✕
                                         </button>

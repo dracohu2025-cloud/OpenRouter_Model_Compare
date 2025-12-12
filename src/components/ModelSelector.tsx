@@ -52,14 +52,14 @@ function ModelSelector({ allModels, selectedIds, onAdd }: ModelSelectorProps) {
                 className="add-model-btn"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                ➕ 添加模型对比
+                ➕ Add Model
             </button>
 
             {isOpen && (
                 <div className="selector-dropdown">
                     <input
                         type="text"
-                        placeholder="搜索模型名称、ID 或厂商..."
+                        placeholder="Search by name, ID, or provider..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="selector-search"
@@ -69,7 +69,7 @@ function ModelSelector({ allModels, selectedIds, onAdd }: ModelSelectorProps) {
                     <div className="selector-list">
                         {availableModels.length === 0 ? (
                             <div className="selector-empty">
-                                {searchQuery ? '没有找到匹配的模型' : '所有模型已添加'}
+                                {searchQuery ? 'No matching models found' : 'All models added'}
                             </div>
                         ) : (
                             availableModels.map(model => (
@@ -96,7 +96,7 @@ function ModelSelector({ allModels, selectedIds, onAdd }: ModelSelectorProps) {
                     </div>
 
                     <div className="selector-footer">
-                        共 {allModels.length - selectedIds.size} 个可添加模型
+                        {allModels.length - selectedIds.size} models available
                     </div>
                 </div>
             )}
