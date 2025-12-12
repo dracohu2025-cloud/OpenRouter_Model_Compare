@@ -215,6 +215,17 @@ function App() {
           {' | '}
           Prices: USD per million tokens
         </p>
+        <a
+          href="https://www.buymeacoffee.com/dracohu2027"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="coffee-btn"
+        >
+          <img
+            src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+            alt="Buy Me A Coffee"
+          />
+        </a>
       </footer>
     </div>
   );

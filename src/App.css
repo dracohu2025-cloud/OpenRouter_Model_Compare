@@ -355,6 +355,10 @@ body {
   border-top: 1px solid var(--color-border);
   color: var(--color-text-muted);
   font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
 }
 
 .footer a {
@@ -365,6 +369,21 @@ body {
 
 .footer a:hover {
   color: var(--color-accent-primary);
+}
+
+.coffee-btn {
+  display: inline-block;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.coffee-btn:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.coffee-btn img {
+  height: 50px;
+  width: auto;
 }
 
 /* Responsive */
