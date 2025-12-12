@@ -4,6 +4,8 @@ A web application to compare pricing and context length of 345+ Large Language M
 
 ![OpenRouter Model Comparison](https://img.shields.io/badge/Models-345+-blue) ![Vercel](https://img.shields.io/badge/Deployed-Vercel-black) ![React](https://img.shields.io/badge/React-18-61DAFB) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support-yellow?logo=buymeacoffee&logoColor=white)](https://www.buymeacoffee.com/dracohu2027)
+
 ## 🚀 Features
 
 - **Real-time Data**: Fetches latest model information directly from OpenRouter API
