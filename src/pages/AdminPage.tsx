@@ -100,7 +100,8 @@ function AdminPage() {
             });
 
             if (res.ok) {
-                setSaveMessage('✅ Saved! All users will now see the new default model list.');
+                const data = await res.json();
+                setSaveMessage(`✅ Saved! To persist after redeployment, copy the value below and update DEFAULT_MODELS in Vercel Environment Variables:\n\n${data.envValue}`);
             } else {
                 if (res.status === 401) {
                     setIsAuthenticated(false);

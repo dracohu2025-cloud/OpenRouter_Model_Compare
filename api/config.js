@@ -1,17 +1,18 @@
 /**
- * Admin API: 获取和更新默认模型配置
+ * Admin API: Get and update default model configuration
  * 
- * GET - 获取当前配置（公开）
- * POST - 更新配置（需要认证）
+ * GET - Get current config (public)
+ * POST - Update config (requires auth)
  * 
- * 认证方式: Basic Auth 或 Bearer Token
- * 管理员账号密码通过环境变量配置:
- *   ADMIN_USERNAME (默认: admin)
- *   ADMIN_PASSWORD (必须配置)
+ * Authentication: Basic Auth or Bearer Token
+ * Environment variables:
+ *   ADMIN_USERNAME (default: admin)
+ *   ADMIN_PASSWORD (required)
+ *   DEFAULT_MODELS (comma-separated model IDs, persisted config)
  */
 
-// 默认模型列表（当没有配置时使用）
-const DEFAULT_MODELS = [
+// Fallback model list (when no config is set)
+const FALLBACK_MODELS = [
     'openai/gpt-4o',
     'openai/gpt-4o-mini',
     'anthropic/claude-sonnet-4',
@@ -24,16 +25,19 @@ const DEFAULT_MODELS = [
     'mistralai/mistral-large-2411',
 ];
 
-// 简单的内存存储（生产环境应使用 KV Storage）
-// 注意：Serverless 函数重启后会重置
-let configStore = {
-    defaultModels: DEFAULT_MODELS,
-    updatedAt: new Date().toISOString(),
-    updatedBy: 'system'
-};
+/**
+ * Get default models from environment variable or fallback
+ */
+function getDefaultModels() {
+    const envModels = process.env.DEFAULT_MODELS;
+    if (envModels && envModels.trim()) {
+        return envModels.split(',').map(id => id.trim()).filter(Boolean);
+    }
+    return FALLBACK_MODELS;
+}
 
 /**
- * 验证管理员认证
+ * Verify admin authentication
  */
 function verifyAuth(req) {
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
@@ -50,7 +54,7 @@ function verifyAuth(req) {
         return { valid: false, error: 'No authorization header' };
     }
 
-    // 支持 Basic Auth
+    // Support Basic Auth
     if (authHeader.startsWith('Basic ')) {
         const base64 = authHeader.slice(6);
         const decoded = Buffer.from(base64, 'base64').toString('utf-8');
@@ -61,7 +65,7 @@ function verifyAuth(req) {
         }
     }
 
-    // 支持 Bearer Token (简单密码验证)
+    // Support Bearer Token
     if (authHeader.startsWith('Bearer ')) {
         const token = authHeader.slice(7);
         if (token === adminPassword) {
@@ -82,16 +86,18 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
-    // GET: 获取当前配置（公开）
+    // GET: Get current config (public)
     if (req.method === 'GET') {
+        const defaultModels = getDefaultModels();
         return res.status(200).json({
-            defaultModels: configStore.defaultModels,
-            updatedAt: configStore.updatedAt,
-            count: configStore.defaultModels.length
+            defaultModels,
+            count: defaultModels.length,
+            source: process.env.DEFAULT_MODELS ? 'environment' : 'fallback'
         });
     }
 
-    // POST: 更新配置（需要认证）
+    // POST: Update config (requires auth)
+    // Note: This updates the response but requires manual env var update for persistence
     if (req.method === 'POST') {
         const auth = verifyAuth(req);
 
@@ -112,17 +118,16 @@ export default async function handler(req, res) {
                 });
             }
 
-            // 更新配置
-            configStore = {
-                defaultModels,
-                updatedAt: new Date().toISOString(),
-                updatedBy: auth.username
-            };
+            // Generate the environment variable value for the user to copy
+            const envValue = defaultModels.join(',');
 
             return res.status(200).json({
                 success: true,
-                message: 'Configuration updated',
-                ...configStore
+                message: 'Config saved. To persist after redeployment, update the DEFAULT_MODELS environment variable in Vercel.',
+                defaultModels,
+                count: defaultModels.length,
+                envValue,
+                instructions: `Go to Vercel → Settings → Environment Variables → Set DEFAULT_MODELS to:\n${envValue}`
             });
 
         } catch (error) {

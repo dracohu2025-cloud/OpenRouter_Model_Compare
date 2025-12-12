@@ -58,7 +58,7 @@ Or manually:
 2. Import the GitHub repository
 3. Deploy with default settings
 
-### 3. Configure Admin Password
+### 3. Configure Environment Variables
 
 In your Vercel project settings:
 
@@ -69,8 +69,16 @@ In your Vercel project settings:
 |----------|-------|----------|
 | `ADMIN_PASSWORD` | Your secure password | ✅ Yes |
 | `ADMIN_USERNAME` | Custom username | ❌ No (default: `admin`) |
+| `DEFAULT_MODELS` | Comma-separated model IDs | ❌ No (persists admin config) |
+
+**Example `DEFAULT_MODELS`:**
+```
+openai/gpt-4o,anthropic/claude-sonnet-4,google/gemini-2.5-pro-preview-06-05
+```
 
 3. Redeploy to apply changes
+
+> **Note**: When you save in Admin Panel, it will show the value to copy into `DEFAULT_MODELS` for persistence across deployments.
 
 ## 🔧 Local Development
 
