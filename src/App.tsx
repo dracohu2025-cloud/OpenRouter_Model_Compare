@@ -2,42 +2,31 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { ModelsData, SortField, SortDirection } from './types';
 import ModelTable from './components/ModelTable';
 import ModelSelector from './components/ModelSelector';
-import Admin from './components/Admin';
 import './App.css';
 
-// 默认展示的模型 ID（主流常用模型）
-const DEFAULT_MODEL_IDS = [
+// 本地回退的默认模型列表
+const FALLBACK_MODEL_IDS = [
   'openai/gpt-4o',
   'openai/gpt-4o-mini',
   'anthropic/claude-sonnet-4',
   'anthropic/claude-3.5-sonnet',
   'google/gemini-2.5-pro-preview-06-05',
-  'google/gemini-2.5-flash-preview-05-20',
   'deepseek/deepseek-chat',
   'deepseek/deepseek-r1',
   'meta-llama/llama-3.3-70b-instruct',
   'mistralai/mistral-large-2411',
 ];
 
-// localStorage key
-const STORAGE_KEY = 'openrouter_default_models';
-
 function App() {
   const [allModelsData, setAllModelsData] = useState<ModelsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 默认模型配置（从 localStorage 读取）
-  const [defaultModelIds, setDefaultModelIds] = useState<string[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : DEFAULT_MODEL_IDS;
-  });
+  // 服务端配置的默认模型 ID
+  const [serverDefaultIds, setServerDefaultIds] = useState<string[]>([]);
 
   // 用户当前选择展示的模型（包含默认 + 用户临时添加的）
   const [displayModelIds, setDisplayModelIds] = useState<Set<string>>(new Set());
-
-  // Admin 面板状态
-  const [showAdmin, setShowAdmin] = useState(false);
 
   // 排序状态
   const [sortField, setSortField] = useState<SortField>('inputPrice');
@@ -47,24 +36,35 @@ function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let response = await fetch('/api/models');
+        // 并行获取模型数据和配置
+        const [modelsRes, configRes] = await Promise.all([
+          fetch('/api/models').catch(() => fetch('/data/models.json')),
+          fetch('/api/config').catch(() => null)
+        ]);
 
-        if (!response.ok) {
-          console.log('API unavailable, falling back to static file');
-          response = await fetch('/data/models.json');
+        if (!modelsRes.ok) throw new Error('数据加载失败');
+
+        const modelsData: ModelsData = await modelsRes.json();
+        setAllModelsData(modelsData);
+
+        // 获取服务端配置的默认模型
+        let defaultIds = FALLBACK_MODEL_IDS;
+        if (configRes && configRes.ok) {
+          const configData = await configRes.json();
+          if (configData.defaultModels && configData.defaultModels.length > 0) {
+            defaultIds = configData.defaultModels;
+          }
         }
 
-        if (!response.ok) throw new Error('数据加载失败');
+        setServerDefaultIds(defaultIds);
 
-        const data: ModelsData = await response.json();
-        setAllModelsData(data);
-
-        // 初始化显示的模型
-        const validIds = defaultModelIds.filter(id =>
-          data.models.some(m => m.id === id)
+        // 初始化显示的模型（过滤有效的 ID）
+        const validIds = defaultIds.filter(id =>
+          modelsData.models.some(m => m.id === id)
         );
         setDisplayModelIds(new Set(validIds));
         setLoading(false);
+
       } catch (err) {
         setError(err instanceof Error ? err.message : '未知错误');
         setLoading(false);
@@ -72,23 +72,6 @@ function App() {
     };
 
     fetchData();
-  }, []);
-
-  // 更新显示的模型列表（当默认配置变化时）
-  useEffect(() => {
-    if (allModelsData) {
-      const validIds = defaultModelIds.filter(id =>
-        allModelsData.models.some(m => m.id === id)
-      );
-      setDisplayModelIds(new Set(validIds));
-    }
-  }, [defaultModelIds, allModelsData]);
-
-  // 保存默认模型配置
-  const saveDefaultModels = useCallback((modelIds: string[]) => {
-    setDefaultModelIds(modelIds);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(modelIds));
-    setDisplayModelIds(new Set(modelIds));
   }, []);
 
   // 添加模型到对比列表
@@ -104,6 +87,16 @@ function App() {
       return newSet;
     });
   }, []);
+
+  // 重置为默认列表
+  const resetToDefault = useCallback(() => {
+    if (allModelsData) {
+      const validIds = serverDefaultIds.filter(id =>
+        allModelsData.models.some(m => m.id === id)
+      );
+      setDisplayModelIds(new Set(validIds));
+    }
+  }, [allModelsData, serverDefaultIds]);
 
   // 过滤显示的模型并排序
   const displayedModels = useMemo(() => {
@@ -189,10 +182,11 @@ function App() {
               当前对比 {displayedModels.length} 个模型
             </span>
             <button
-              className="admin-btn"
-              onClick={() => setShowAdmin(true)}
+              className="reset-btn"
+              onClick={resetToDefault}
+              title="重置为管理员配置的默认列表"
             >
-              ⚙️ 管理默认列表
+              🔄 重置列表
             </button>
           </div>
         </div>
@@ -210,7 +204,7 @@ function App() {
         {displayedModels.length === 0 && (
           <div className="empty-state">
             <p>😅 没有选择任何模型</p>
-            <p>点击上方"添加模型对比"按钮，或在"管理默认列表"中设置默认模型</p>
+            <p>点击上方"添加模型对比"按钮添加模型</p>
           </div>
         )}
       </main>
@@ -222,16 +216,6 @@ function App() {
           价格单位: 美元/百万 Token
         </p>
       </footer>
-
-      {/* Admin 面板 */}
-      {showAdmin && allModelsData && (
-        <Admin
-          onClose={() => setShowAdmin(false)}
-          allModels={allModelsData.models}
-          selectedModelIds={defaultModelIds}
-          onSave={saveDefaultModels}
-        />
-      )}
     </div>
   );
 }
