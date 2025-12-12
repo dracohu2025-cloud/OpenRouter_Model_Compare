@@ -17,19 +17,30 @@ function App() {
 
   // 加载数据
   useEffect(() => {
-    fetch('/data/models.json')
-      .then(res => {
-        if (!res.ok) throw new Error('数据加载失败');
-        return res.json();
-      })
-      .then((data: ModelsData) => {
+    // 优先从 API 获取（Vercel Serverless），回退到静态文件
+    const fetchData = async () => {
+      try {
+        // 尝试从 API 获取
+        let response = await fetch('/api/models');
+
+        // 如果 API 不可用，回退到静态文件
+        if (!response.ok) {
+          console.log('API unavailable, falling back to static file');
+          response = await fetch('/data/models.json');
+        }
+
+        if (!response.ok) throw new Error('数据加载失败');
+
+        const data: ModelsData = await response.json();
         setModelsData(data);
         setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '未知错误');
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, []);
 
   // 获取所有厂商列表
